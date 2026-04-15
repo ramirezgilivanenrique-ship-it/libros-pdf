@@ -3,12 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <title>Buscador de Libros</title>
+
   <style>
     body {
       font-family: Arial;
       text-align: center;
       background: #f5f5f5;
     }
+
+    h1 {
+      margin-top: 20px;
+    }
+
     input {
       padding: 10px;
       margin: 5px;
@@ -16,6 +22,7 @@
       border-radius: 8px;
       border: 1px solid #ccc;
     }
+
     button {
       padding: 10px 20px;
       border: none;
@@ -23,7 +30,13 @@
       background: #1a73e8;
       color: white;
       cursor: pointer;
+      font-size: 14px;
     }
+
+    button:hover {
+      background: #1558b0;
+    }
+
     .resultado {
       background: white;
       margin: 15px auto;
@@ -32,16 +45,28 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+
     img {
       width: 120px;
+      border-radius: 6px;
+    }
+
+    a {
+      display: inline-block;
+      margin: 5px;
+      text-decoration: none;
+      color: #1a73e8;
+      font-weight: bold;
     }
   </style>
 </head>
+
 <body>
 
   <h1>📚 Buscador de Libros</h1>
 
   <input type="text" id="busqueda" placeholder="Nombre del libro">
+  <br>
   <button onclick="buscarLibros()">Buscar</button>
 
   <div id="resultados"></div>
@@ -49,18 +74,22 @@
   <script>
 
     async function buscarLibros() {
+
       let query = document.getElementById("busqueda").value;
 
       if (!query) {
-        alert("Escribe un libro");
+        alert("Por favor escribe un libro");
         return;
       }
 
       let contenedor = document.getElementById("resultados");
-      contenedor.innerHTML = "🔎 Buscando...";
+      contenedor.innerHTML = "🔎 Buscando libros...";
 
       try {
-        let url = "https://openlibrary.org/search.json?q=" + encodeURIComponent(query) + "&limit=10";
+
+        let url = "https://openlibrary.org/search.json?q=" 
+                  + encodeURIComponent(query) 
+                  + "&limit=5&fields=title,author_name,cover_i,key,ebook_access";
 
         let respuesta = await fetch(url);
         let datos = await respuesta.json();
@@ -68,7 +97,7 @@
         contenedor.innerHTML = "";
 
         let librosFiltrados = datos.docs.filter(libro => 
-          libro.ebook_access === "public" || libro.has_fulltext === true
+          libro.ebook_access === "public"
         );
 
         if (librosFiltrados.length === 0) {
@@ -76,7 +105,8 @@
           return;
         }
 
-        librosFiltrados.slice(0, 10).forEach(libro => {
+        librosFiltrados.forEach(libro => {
+
           let titulo = libro.title || "Sin título";
           let autor = libro.author_name ? libro.author_name[0] : "Desconocido";
 
@@ -90,25 +120,28 @@
             <div class="resultado">
               <h3>${titulo}</h3>
               <p>${autor}</p>
+
               ${portada ? `<img src="${portada}">` : ""}
+
               <br><br>
-              <button onclick="abrirLibro('${link}')">📖 Ver libro</button>
+
+              <a href="${link}" target="_blank">
+                📖 Ver libro
+              </a>
+
+              <br>
+
+              <a href="https://www.google.com/search?q=${encodeURIComponent(titulo + ' ' + autor + ' filetype:pdf')}" target="_blank">
+                📥 Buscar PDF
+              </a>
             </div>
           `;
         });
 
       } catch (error) {
-        document.getElementById("resultados").innerHTML = "⚠️ Error al buscar";
+        contenedor.innerHTML = "⚠️ Error al buscar. Intenta nuevamente.";
         console.error(error);
       }
-    }
-
-    function abrirLibro(url) {
-      document.getElementById("resultados").innerHTML = `
-        <iframe src="${url}" width="100%" height="600px"></iframe>
-        <br><br>
-        <button onclick="location.reload()">🔙 Volver</button>
-      `;
     }
 
   </script>
