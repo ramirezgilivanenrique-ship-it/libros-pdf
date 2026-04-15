@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Buscador de Libros</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #f5f5f5;
+    }
+    input {
+      padding: 10px;
+      margin: 5px;
+      width: 200px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #1a73e8;
+      color: white;
+      cursor: pointer;
+    }
+    .resultado {
+      background: white;
+      margin: 15px auto;
+      padding: 15px;
+      width: 300px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    img {
+      width: 120px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📚 Buscador de Libros</h1>
+
+  <input type="text" id="busqueda" placeholder="Nombre del libro">
+  <button onclick="buscarLibros()">Buscar</button>
+
+  <div id="resultados"></div>
+
+  <script>
+    async function buscarLibros() {
+      let query = document.getElementById("busqueda").value;
+
+      let url = "https://openlibrary.org/search.json?q=" + query;
+
+      let respuesta = await fetch(url);
+      let datos = await respuesta.json();
+
+      let contenedor = document.getElementById("resultados");
+      contenedor.innerHTML = "";
+
+      datos.docs.slice(0, 10).forEach(libro => {
+        let titulo = libro.title;
+        let autor = libro.author_name ? libro.author_name[0] : "Desconocido";
+        let portada = libro.cover_i 
+          ? "https://covers.openlibrary.org/b/id/" + libro.cover_i + "-M.jpg"
+          : "";
+
+        let link = "https://openlibrary.org" + libro.key;
+
+        contenedor.innerHTML += `
+          <div class="resultado">
+            <h3>${titulo}</h3>
+            <p>${autor}</p>
+            ${portada ? `<img src="${portada}">` : ""}
+            <br><br>
+            <a href="${link}" target="_blank">Ver libro</a>
+          </div>
+        `;
+      });
+    }
+  </script>
+
+</body>
+</html>
