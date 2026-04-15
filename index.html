@@ -58,7 +58,10 @@
       let contenedor = document.getElementById("resultados");
       contenedor.innerHTML = "";
 
-      datos.docs.slice(0, 10).forEach(libro => {
+datos.docs
+  .filter(libro => libro.ebook_access === "public" || libro.has_fulltext === true)
+  .slice(0, 10)
+  .forEach(libro => {
         let titulo = libro.title;
         let autor = libro.author_name ? libro.author_name[0] : "Desconocido";
         let portada = libro.cover_i 
