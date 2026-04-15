@@ -12,7 +12,7 @@
     input {
       padding: 10px;
       margin: 5px;
-      width: 200px;
+      width: 220px;
       border-radius: 8px;
       border: 1px solid #ccc;
     }
@@ -28,7 +28,7 @@
       background: white;
       margin: 15px auto;
       padding: 15px;
-      width: 300px;
+      width: 320px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
@@ -42,52 +42,75 @@
   <h1>📚 Buscador de Libros</h1>
 
   <input type="text" id="busqueda" placeholder="Nombre del libro">
-  <button onclick="abrirLibro('${link}')">📖 Ver libro</button>
-  function abrirLibro(url) {
-    document.getElementById("resultados").innerHTML = `
-      <iframe src="${url}" width="100%" height="600px"></iframe>
-      <br><br>
-      <button onclick="location.reload()">🔙 Volver</button>
-    `;
-  }
-  
+  <button onclick="buscarLibros()">Buscar</button>
+
   <div id="resultados"></div>
 
   <script>
+
     async function buscarLibros() {
       let query = document.getElementById("busqueda").value;
 
-      let url = "https://openlibrary.org/search.json?q=" + query;
-
-      let respuesta = await fetch(url);
-      let datos = await respuesta.json();
+      if (!query) {
+        alert("Escribe un libro");
+        return;
+      }
 
       let contenedor = document.getElementById("resultados");
-      contenedor.innerHTML = "";
+      contenedor.innerHTML = "🔎 Buscando...";
 
-datos.docs
-  .filter(libro => libro.ebook_access === "public" || libro.has_fulltext === true)
-  .slice(0, 10)
-  .forEach(libro => {
-        let titulo = libro.title;
-        let autor = libro.author_name ? libro.author_name[0] : "Desconocido";
-        let portada = libro.cover_i 
-          ? "https://covers.openlibrary.org/b/id/" + libro.cover_i + "-M.jpg"
-          : "";
+      try {
+        let url = "https://openlibrary.org/search.json?q=" + encodeURIComponent(query) + "&limit=10";
 
-        let link = "https://openlibrary.org" + libro.key;
+        let respuesta = await fetch(url);
+        let datos = await respuesta.json();
 
-        contenedor.innerHTML += `
-          <div class="resultado">
-            <h3>${titulo}</h3>
-            <p>${autor}</p>
-            ${portada ? `<img src="${portada}">` : ""}
-            <br><br>
-            <a href="${link}" target="_blank">📖 Ver / Leer libro</a>
-          </div>
-        `;
-      });
+        contenedor.innerHTML = "";
+
+        let librosFiltrados = datos.docs.filter(libro => 
+          libro.ebook_access === "public" || libro.has_fulltext === true
+        );
+
+        if (librosFiltrados.length === 0) {
+          contenedor.innerHTML = "❌ No se encontraron libros gratuitos";
+          return;
+        }
+
+        librosFiltrados.slice(0, 10).forEach(libro => {
+          let titulo = libro.title || "Sin título";
+          let autor = libro.author_name ? libro.author_name[0] : "Desconocido";
+
+          let portada = libro.cover_i 
+            ? "https://covers.openlibrary.org/b/id/" + libro.cover_i + "-M.jpg"
+            : "";
+
+          let link = "https://openlibrary.org" + libro.key;
+
+          contenedor.innerHTML += `
+            <div class="resultado">
+              <h3>${titulo}</h3>
+              <p>${autor}</p>
+              ${portada ? `<img src="${portada}">` : ""}
+              <br><br>
+              <button onclick="abrirLibro('${link}')">📖 Ver libro</button>
+            </div>
+          `;
+        });
+
+      } catch (error) {
+        document.getElementById("resultados").innerHTML = "⚠️ Error al buscar";
+        console.error(error);
+      }
     }
+
+    function abrirLibro(url) {
+      document.getElementById("resultados").innerHTML = `
+        <iframe src="${url}" width="100%" height="600px"></iframe>
+        <br><br>
+        <button onclick="location.reload()">🔙 Volver</button>
+      `;
+    }
+
   </script>
 
 </body>
