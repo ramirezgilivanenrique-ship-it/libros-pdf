@@ -42,8 +42,15 @@
   <h1>📚 Buscador de Libros</h1>
 
   <input type="text" id="busqueda" placeholder="Nombre del libro">
-  <button onclick="buscarLibros()">Buscar</button>
-
+  <button onclick="abrirLibro('${link}')">📖 Ver libro</button>
+  function abrirLibro(url) {
+    document.getElementById("resultados").innerHTML = `
+      <iframe src="${url}" width="100%" height="600px"></iframe>
+      <br><br>
+      <button onclick="location.reload()">🔙 Volver</button>
+    `;
+  }
+  
   <div id="resultados"></div>
 
   <script>
@@ -76,7 +83,7 @@ datos.docs
             <p>${autor}</p>
             ${portada ? `<img src="${portada}">` : ""}
             <br><br>
-            <a href="${link}" target="_blank">Ver libro</a>
+            <a href="${link}" target="_blank">📖 Ver / Leer libro</a>
           </div>
         `;
       });
